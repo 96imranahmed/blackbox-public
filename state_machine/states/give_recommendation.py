@@ -11,16 +11,15 @@ def pro_give_recommendation(state_info):
 
     if intent == 'Accept' or intent == 'Like':
         if 'values' in state_info.processed_data:
-            if len(state_info.processed_data['values']) > 0 :
-                event = state_info.processed_data['values'][0]
-            else:
-                event = None
-            if event is not None:
-                state_info.user.likes.append(event)
-            if intent == 'Accept':
-                return 'set_date'
+            event = state_info.processed_data['values'][0]
         else:
-            return 'give_recommendation'
+            event = None
+        if event is not None:
+            state_info.user.likes.append(event)
+        if intent == 'Accept':
+            return 'set_date'
+        else:
+            return 'start_no_name'
 
     elif intent == 'Decline' or intent == 'Dislike':
         print("just after decline, " + state_info.processed_data)
@@ -67,6 +66,8 @@ def con_give_recommendation(state_info):
         }
     ]
     state_info.bot.quick_reply(state_info.user.get_user(), "Any good?", replies)
+
+    state_info.recommended_event = event
 
     return None
 

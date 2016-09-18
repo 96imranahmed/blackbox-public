@@ -16,9 +16,10 @@ from state_machine import state_machine
 from StateInfo import StateInfo
 
 URL = 'https://blackboxai.me/'
-COMMANDS = ["clear", "howdy", "waddup"]
-VALIDATION_TOKEN = 'super_amazing_secret_token'
-ACCESS_TOKEN = ‘even_longer_super_amazing_secret_token’
+COMMANDS = ["clear", "howdy", "waddup", "neg"]
+GREETINGS = ["hi", "hello", "hey", "yo", "howdy", "sup", "hey there"]
+VALIDATION_TOKEN = 'super_secret_token'
+ACCESS_TOKEN = 'EAACJ5DFzYO8BABXRv362CiYO2831qbhmgH0HXBWJImCunnkpoNY97U8qJNNLAzJKCJZBcxhoMKsvmobMRXQMY0yI8HZBmWJvbLOZCO9pFi4eDSBLIzQirqw2Qeoe8n9okA8nFYBZCZCKBZCgfkILIEqsqTIYhVk4p94L0NWdnaLwZDZD'
 bot = Bot(ACCESS_TOKEN)
 app = Flask(__name__)
 app.secret_key = 'super_duper_secret_token'
@@ -43,7 +44,6 @@ def welcome():
     elif request.method == 'POST':
         data = request.json
         messages = data['entry'][0]['messaging']
-        print(messages)
         for msg in messages:
             if (msg.get('message') and msg['message'].get('text') and not 'is_echo' in msg['message'] and not 'delivery' in msg):
                 if not 'quick_reply' in msg['message'] and not 'attachments' in msg['message']:
@@ -63,20 +63,40 @@ def welcome():
                                 bot.send_text_message(user_id, "Howdy fella")
                             elif message == "waddup":
                                 bot.send_text_message(user_id, "it's ya boi")
+                            elif message == "neg":
+                                bot.send_text_message(user_id, "You look like you're going to spend your life having one epiphany after another, always thinking you've finally figured out what's holding you back, and how you can finally be productive and creative and turn your life around. But nothing will ever change. That cycle of mediocrity isn't due to some obstacle. It's who you are. The thing standing in the way of your dreams is; that the person having them is you.")
+
                         else:
                             bot.send_text_message(user_id, "Command not recognised :( ")
                     else:
-                        # login on our server and on google
-                        #jacqueslog(user_id, bot)
+                        if (queryDB('new_user_check', user_id) == False):
+                            bot.send_text_message(user_id,
+                                                  "Hey there " + user_id + " It's looking like this is your first message!")
+                            queryDB('add_user', user_id)
+                            if queryDB('get_user_name', user_id) == False:
+                                bot.send_text_message(user_id,
+                                                      "Hmm, I'm not a fan of calling you by your ID. How about you give me a proper name?")
+                        else:
+                            set = False
+                            if queryDB('get_user_name', user_id) == '_is_updating_':
+                                queryDB('set_user_name', [user_id, message])
+                                bot.send_text_message(user_id, 'Great, I\'ll call you ' + message + ' from now on!')
+                                set = True
+                            name = queryDB('get_user_name', user_id)
+                            if (message.lower() in GREETINGS):
+                                if set == False:
+                                    bot.send_text_message(user_id, "Hey there " + name)
+                            else:
+                                # login on our server and on google
+                                jacqueslog(user_id, bot)
+                                # call NLP and state machine
 
-                        # call NLP and state machine
-                        try:
-                            flow(message)
-                        except Exception as e:
-                            print(e)
-                            print('DEBUG')
-
-                        pass
+                                try:
+                                    flow(message)
+                                    pass
+                                except Exception as e:
+                                    print(e)
+                                    print('DEBUG')
                     bot.send_typing(user_id, False)
                 else:
                     #Handle custom reply
@@ -84,6 +104,7 @@ def welcome():
                         payload = msg['message']['quick_reply']['payload']
                         print(payload)
                         #Quick replies
+                        flow_hack(payload)
                     elif 'attachments' in msg['message']:
                         if  msg['message']['attachments']['type'] == 'location':
                             payload = msg['message']['attachments']['payload']['coordinates']
@@ -96,11 +117,6 @@ def welcome():
 
 
 def jacqueslog(user_id, bot):
-    if (queryDB('new_user_check', user_id) == False):
-        bot.send_text_message(user_id, "Hey there " + user_id + " It's looking like this is your first message!")
-        queryDB('add_user', user_id)
-    else:
-        bot.send_text_message(user_id, "Welcome back " + user_id + "!")
 
     if (queryDB('google_cal_check', user_id) == False):
         # edit the url below to be blackbox.../login flow
@@ -117,14 +133,26 @@ def jacqueslog(user_id, bot):
         ]
         bot.send_button_message(user_id, "How about you connect your Google Calendar? :)",
                                 oauth_request_button)
-
-
 def flow(message):
     state_info.processed_data, flag_empty = u_s.get_NLP(message)
     print(state_info.processed_data)
     intent = state_info.processed_data['intent']
     print(intent)
-    state_info.bot.send_text_message(state_info.user.user_id, str(intent))
+
+    state_info.flag_empty = flag_empty
+    state_machine.state_machine(state_info)
+
+
+def flow_hack(message):
+    result = message[-1]
+    if result:
+        state_info.processed_data, flag_empty = u_s.get_intent(u_s.load_json("yes"))
+    else:
+        state_info.processed_data, flag_empty = u_s.get_intent(u_s.load_json("no"))
+    print(state_info.processed_data)
+    intent = state_info.processed_data['intent']
+    print(intent)
+
     state_info.flag_empty = flag_empty
     state_machine.state_machine(state_info)
 

@@ -48,6 +48,25 @@ def queryDB(identifier, data_in):
             conn.commit()
         except:
             conn.rollback()
+    elif identifier == 'get_user_name':
+        sql = 'select (name) from `users` where user_id = ' + str(data_in)
+        db_execute(sql)
+        row = cur.fetchone()
+        if (row == None or row[0] == None) :
+            sql = 'UPDATE `users` SET name = \'_is_updating_\' where user_id = ' + str(data_in)
+            db_execute(sql)
+            conn.commit()
+            return 0
+        else:
+            return row[0]
+    elif identifier == 'set_user_name':
+        try:
+            sql = 'UPDATE `users` SET name = \'' + str(data_in[1]) + '\' where user_id = ' + str(data_in[0])
+            print(sql)
+            db_execute(sql)
+            conn.commit()
+        except:
+            conn.rollback()
     elif identifier == 'google_cal_check':
         sql = 'select `google_calendar_token` from `users` where user_id = ' + str(data_in)
         db_execute(sql)
@@ -75,6 +94,8 @@ def queryDB(identifier, data_in):
                     refresh_token = cur_cred['refresh_token']
                     cur_token = cur_cred['access_token']
                     queryDB('google_token_enter', [str(data_in), str(cur_token) + '||' + str(refresh_token)])
+                    new_cred = client.AccessTokenCredentials(cur_token, request.headers.get('User-Agent'))
+                    return new_cred
                     print('Tried to renew authentication tokens')
                     print(cur_cred)
                 return True
@@ -83,7 +104,6 @@ def queryDB(identifier, data_in):
     elif identifier == 'google_token_enter':
         try:
             sql = 'UPDATE `users` SET google_calendar_token = \'' + str(data_in[1]) + '\' where user_id = ' + str(data_in[0])
-            print(sql)
             db_execute(sql)
             conn.commit()
         except:

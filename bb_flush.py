@@ -17,8 +17,8 @@ from StateInfo import StateInfo
 
 URL = 'https://blackboxai.me/'
 COMMANDS = ["clear", "howdy", "waddup"]
-VALIDATION_TOKEN = 'super_amazing_secret_token'
-ACCESS_TOKEN = ‘even_longer_super_amazing_secret_token’
+VALIDATION_TOKEN = 'super_secret_token'
+ACCESS_TOKEN = 'EAACJ5DFzYO8BABXRv362CiYO2831qbhmgH0HXBWJImCunnkpoNY97U8qJNNLAzJKCJZBcxhoMKsvmobMRXQMY0yI8HZBmWJvbLOZCO9pFi4eDSBLIzQirqw2Qeoe8n9okA8nFYBZCZCKBZCgfkILIEqsqTIYhVk4p94L0NWdnaLwZDZD'
 bot = Bot(ACCESS_TOKEN)
 app = Flask(__name__)
 app.secret_key = 'super_duper_secret_token'

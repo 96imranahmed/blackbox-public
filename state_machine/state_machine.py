@@ -20,7 +20,6 @@ def state_machine(state_info):
     print(state_info.processed_data)
     print(state_info.cur_state, 'cur_state')
     if state_info.started == False:
-        state_info.bot.send_text_message(state_info.user.get_user(), "Welcome  " + state_info.user.get_user() + "!")
         state_info.started = True
 
     next_state = proc_states[state_info.cur_state](state_info)
