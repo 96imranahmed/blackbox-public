@@ -1,0 +1,28 @@
+p)Hey  
+b)Hi! Are you looking for dating advice?
+p)Yes (No)
+b)OK! Who is today's conquest?
+p)<name>
+b)Got it! Here are some potential pickup lines for <name>.
+<pickups>
+Try them out! Did it work?
+p)Yes (no)
+b)Great! Maybe a date would be a good next idea? What kind of thing do you want to do, or would you like some recommendations?
+p)I like going to coffee shops for a first date
+b)Coffee shops, right? Here's a recommendation for a nice coffee shop nearby:
+<coffeeshops>
+Also, here's a potential message for asking <name> out, edit it and send!
+<message>
+Let me know how it goes!
+p) she said Yes
+b)Great, when is it?
+p) tomorrow at 10
+b)Ok, I'll make a Google Calendar entry for you.
+<calendar>
+I'll also remind you before about it! Don't want to be late!
+
+/nextday
+
+b)Hey! You have a date in an hour! Remember to dress nice.
+Here are directions to where you need to go:
+<directions>
